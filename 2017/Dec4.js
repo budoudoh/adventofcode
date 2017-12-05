@@ -1,6 +1,5 @@
 const readline = require('readline');
 const fs = require('fs');
-const levenshtein = require('js-levenshtein');
 
 const rl = readline.createInterface({
     input: fs.createReadStream('Dec4.txt')
