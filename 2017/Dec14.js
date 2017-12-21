@@ -117,36 +117,11 @@ function defragmentDisk(key){
 
 function countRegions(key){
     var disk = defragmentDisk(key);
-    var ranges = 0;
-    var scanned_items = 0;
-    while(scanned_items < 128*128){
-        var start = -1;
-        var stop = -1;
-        for(var i=0; i < disk.length; i++){
-            var row = disk[i];
-            //find contiguous full blocks in first row;
-            var contiguous = false;
-            for(var j =0; j < row.length; j++){
-                if(parseInt(row.charAt(j)) == 1){
-                    scanned_items++
-                    row.replaceAt(j, "8");
-                    if(!contiguous){
-                        start = k;
-                        contiguous = true;
-                    }
-                }
-                else if(parseInt(row.charAt(j)) == 0){
-                    scanned_items++;
-                    row.replaceAt(j, "8");
-                    if(contiguous){
-                        stop = k-1;
-                        break;
-                    }
-                }
-            }
-
-        }
-
+    var regions = 0;
+    var current_ranges = [];
+    var previous_ranges = [];
+    for(var i = 0; i < disk.length; i++){
+        
     }
 
 }
