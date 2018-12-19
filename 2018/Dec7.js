@@ -20,7 +20,7 @@ rl.on('line', function (line) {
 });
 
 rl.on('close', function(){
-    console.log(buildInstructions(steps));
+    console.log(runInstructions(steps));
 });
 
 
@@ -79,32 +79,59 @@ function runInstructions(steps){
     var instructions = "";
     var potentialLetters = findFirstInstructions(steps);
     var workers = {}
-    var holding = [];
     potentialLetters.sort();
     var currentSecond = 0;
     while(potentialLetters.length > 0){
-        console.log(potentialLetters);
-        var currentLetter = potentialLetters.shift();
-        var prereqsMet = true;
-        var newLetters = [];
-        for(var step of steps){
-            if(step.next.localeCompare(currentLetter) == 0){
-                if(!instructions.includes(step.prereq)){
-                    prereqsMet = false;
-                    break;
+        while(potentialLetters.length > 0){
+            console.log(potentialLetters);
+            var currentLetter = potentialLetters.shift();
+            var prereqsMet = true;
+            var newLetters = [];
+            for(var step of steps){
+                if(step.next.localeCompare(currentLetter) == 0){
+                    if(!instructions.includes(step.prereq)){
+                        prereqsMet = false;
+                        break;
+                    }
+                }
+            }
+
+            if(prereqsMet && !instructions.includes(currentLetter)){
+                if(Object.keys(workers).length < 5 && !workers.hasOwnProperty(currentLetter)){
+                    workers[currentLetter] = {
+                        start: currentSecond,
+                        end: currentSecond + currentLetter.charCodeAt(0) - 5
+                    }
                 }
             }
         }
 
-        if(prereqsMet && !instructions.includes(currentLetter)){
-            if(Object.keys(workers).length < 5 && !workers.hasOwnProperty(currentLetter)){
-                workers[currentLetter] = {
-                    start: currentSecond,
-                    end: currentSecond + currentLetter.charCodeAt(0) - 65
+        var letterDone = false;
+        while(!letterDone){
+            for(var letter in workers){
+                if(workers[letter].end < currentSecond){
+                    instructions = instructions + letter;
+                    letterDone = true;
+                    delete workers[letter];
+                    var newLetters = [];
+                    for(var step of steps){
+                        if(step.prereq.localeCompare(letter) == 0){
+                            if(!newLetters.includes(step.next)){
+                                newLetters.push(step.next);
+                            }
+                        }
+                    }
+                    potentialLetters = potentialLetters.concat(newLetters);
+                    potentialLetters.sort();
+                    potentialLetters = potentialLetters.filter(onlyUnique);
                 }
             }
+            if(!letterDone){
+                currentSecond++;
+            }
+            
         }
     }
     
-    return instructions;
+    return currentSecond;
 }
