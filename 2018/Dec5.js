@@ -1,8 +1,8 @@
 const fs = require('fs');
-const napa = require('napajs');
-const NUMBER_OF_WORKERS = 15;
+//const napa = require('napajs');
+const NUMBER_OF_WORKERS = 4;
 
-const zone = napa.zone.create('zone', { workers: NUMBER_OF_WORKERS} );
+//const zone = napa.zone.create('zone', { workers: NUMBER_OF_WORKERS} );
 
 fs.readFile("Dec5.txt", function (err, data) {
     if (err) throw err;
@@ -56,14 +56,14 @@ function getShortestPolymer(polymer){
     
     for (i = 0; i < 26; i++) {
         var letter = (i+10).toString(36);
-        var temp = polymer.replace(letter);
-        temp = temp.replace(letter.toUpperCase());
-        promises[i] = zone.execute(determineReactants, [temp]);
+        var temp = polymer.replace(letter, "");
+        temp = temp.replace(letter.toUpperCase(), "");
+        var length = determineReactants(temp);
+        if(length < shortest){
+            shortest = length;
+            shortestLetter = letter;
+        }
     }
 
-    Promise.all(promises).then((results) => {
-        console.log('Result:');
-        console.log(results.map(result => [parseInt(result._payload)]));
-    });
     return shortest +":"+shortestLetter;
 }
