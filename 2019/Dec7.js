@@ -17,14 +17,52 @@ rl.on('close', function(){
 });
 
 function checkAmps(intcode){
-    var settings = "01234";
-    var shuffled = settings.split('').sort(function(){return 0.5-Math.random()}).join('');
-    return shuffled;
+    var settings = "56789";
+    var maxCombinations = 120;
+    var ampsValues = {};
+    var maxValue = 0;
+    var maxAmpsSetting = settings;
+    while(Object.keys(ampsValues).length < maxCombinations){
+        var shuffled = settings.split('').sort(function(){return 0.5-Math.random()}).join('');
+        if(ampsValues.hasOwnProperty(shuffled)){
+            continue;
+        }
+        var amps = calculateAmps(intcode, shuffled);
+        ampsValues[shuffled] = amps;
+        if(amps > maxValue){
+            maxValue = amps;
+            maxAmpsSetting = shuffled;
+        }
+    }
+    return maxAmpsSetting+":"+maxValue;
 }
 
+function calculateAmps(intcode, settings){
+    var lastAmps = 0;
+    console.log(settings);
+    var running = true;
+    while(running){
+        for(var i = 0; i < settings.length; i++){
+            var copy = intcode.slice(0);
+            var phase = parseInt(settings.charAt(i));
+            try{
+                lastAmps = runIntcode(copy, phase, lastAmps);
+            }
+            catch(err){
+                if(err === "HALT"){
+                    console.log("I've halted");
+                    running = false;
+                    break;
+                }
+            }
+        }
+    }   
+    return lastAmps;
+}
 function runIntcode(code, inputOne, inputTwo){
     var window = 0;
     var run = true;
+    var inputOneUsed = false;
     var output;
     while(run){
         var command = parseInt(code[window]);
@@ -37,7 +75,7 @@ function runIntcode(code, inputOne, inputTwo){
         var parameterThreeMode = command%10;
         command = Math.floor(command/10)
         var shift;
-        console.log("Opcode: "+oppCode+", parameterOneMode: "+parameterOneMode+", parameterTwoMode: "+parameterTwoMode);
+        //console.log("Opcode: "+oppCode+", parameterOneMode: "+parameterOneMode+", parameterTwoMode: "+parameterTwoMode);
         switch(oppCode){
             case 1:
                 var positionOne = parseInt(code[window+1]);
@@ -48,7 +86,7 @@ function runIntcode(code, inputOne, inputTwo){
                 var index = parseInt(code[window+3]);
                 code[index] = sum;
                 shift = 4;
-                console.log("Parameter One: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Add - Parameter One: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 2:
                 var positionOne = parseInt(code[window+1]);
@@ -59,25 +97,26 @@ function runIntcode(code, inputOne, inputTwo){
                 var index = parseInt(code[window+3]);
                 code[index] = multiple;
                 shift = 4;
-                console.log("Parameter One:  "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Multiply - Parameter One:  "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 3:
                 var positionOne = parseInt(code[window+1]);
-                if(inputOne != 0){
+                if(!inputOneUsed){
                     code[positionOne] = inputOne;
-                    inputOne = 0;
+                    inputOneUsed = true;
                 }
                 else
                     code[positionOne] = inputTwo;
                 shift = 2;
-                console.log("Parameter One: "+parameterOne);
+                console.log("Set Input - Parameter One: "+positionOne);
                 break;
             case 4:
                 var positionOne = parseInt(code[window+1]);
                 output = parameterOneMode == 0 ? parseInt(code[positionOne]) : positionOne;
                 shift = 2;
-                console.log("Parameter One "+positionOne);
+                console.log("Set Output - Parameter One "+positionOne);
                 console.log("Output: "+output);
+                run = false;
                 break;
             case 5:
                 var positionOne = parseInt(code[window+1]);
@@ -92,7 +131,7 @@ function runIntcode(code, inputOne, inputTwo){
                     shift = 3;
                 }
                 
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Jump if Not Zero - Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 6:
                 var positionOne = parseInt(code[window+1]);
@@ -107,7 +146,7 @@ function runIntcode(code, inputOne, inputTwo){
                     shift = 3;
                 }
                 
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Jump if Zero - Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 7:
                 var positionOne = parseInt(code[window+1]);
@@ -118,7 +157,7 @@ function runIntcode(code, inputOne, inputTwo){
                 var index = parseInt(code[window+3]);
                 code[index] = lessThan;
                 shift = 4;
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Less Than - Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 8:
                 var positionOne = parseInt(code[window+1]);
@@ -129,11 +168,13 @@ function runIntcode(code, inputOne, inputTwo){
                 var index = parseInt(code[window+3]);
                 code[index] = equalTo;
                 shift = 4;
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Equal To - Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 99:
                 run = false;
                 shift = 1;
+                console.log("Done");
+                throw "HALT";
                 break;
         }
         window = window + shift;
