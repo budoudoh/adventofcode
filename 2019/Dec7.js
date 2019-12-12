@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 var intcode = [];
 var resultTest = 19690720;
 rl.on('line', function (line) {
-    //line = "3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99";
+    //line = "3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,-5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10";
     intcode = line.trim().split(",");
 });
 
@@ -27,7 +27,7 @@ function checkAmps(intcode){
         if(ampsValues.hasOwnProperty(shuffled)){
             continue;
         }
-        var amps = calculateAmps(intcode, shuffled);
+        var amps = calculateAmpsPt2(intcode, shuffled);
         ampsValues[shuffled] = amps;
         if(amps > maxValue){
             maxValue = amps;
@@ -40,30 +40,54 @@ function checkAmps(intcode){
 function calculateAmps(intcode, settings){
     var lastAmps = 0;
     console.log(settings);
-    var running = true;
-    while(running){
-        for(var i = 0; i < settings.length; i++){
-            var copy = intcode.slice(0);
-            var phase = parseInt(settings.charAt(i));
-            try{
-                lastAmps = runIntcode(copy, phase, lastAmps);
-            }
-            catch(err){
-                if(err === "HALT"){
-                    console.log("I've halted");
-                    running = false;
-                    break;
-                }
-            }
-        }
-    }   
+
+    for(var i = 0; i < settings.length; i++){
+        var copy = intcode.slice(0);
+        var phase = parseInt(settings.charAt(i));
+        var output = runIntcode(copy, phase, lastAmps, 0, false);
+        lastAmps = output.Output;
+        running = !output.Halt;
+    } 
     return lastAmps;
 }
-function runIntcode(code, inputOne, inputTwo){
-    var window = 0;
+
+function calculateAmpsPt2(intcode, settings){
+    var lastAmps = 0;
+    console.log(settings);
+    var running = true;
+    var ignoreInputOne = false;
+    var state = [];
+    while(running){
+        console.log("LastAmps: "+lastAmps);
+        for(var i = 0; i < settings.length; i++){
+            if(state.length <= i){
+                var copy = intcode.slice(0);
+                state.push({});
+                state[i].endPoint = 0;
+                state[i].intcode = copy;
+            }
+            
+            var phase = parseInt(settings.charAt(i));
+            var output = runIntcode(state[i].intcode, phase, lastAmps, state[i].endPoint, ignoreInputOne);
+            state[i].lastAmps = output.Output;
+            state[i].endPoint = output.EndPoint;
+            state[i].halt = output.Halt;
+            lastAmps = output.Output;
+            running = !output.Halt;
+        }
+        ignoreInputOne = true;
+
+    }
+    return lastAmps;
+}
+
+function runIntcode(code, inputOne, inputTwo, startingPoint, ignoreInputOne){
+    var window = startingPoint;
     var run = true;
     var inputOneUsed = false;
+    var inputTwoUsed = false;
     var output;
+    var halt = false;
     while(run){
         var command = parseInt(code[window]);
         var oppCode = command%100;
@@ -101,22 +125,32 @@ function runIntcode(code, inputOne, inputTwo){
                 break;
             case 3:
                 var positionOne = parseInt(code[window+1]);
-                if(!inputOneUsed){
+                if(!inputOneUsed && !ignoreInputOne){
                     code[positionOne] = inputOne;
                     inputOneUsed = true;
+                    shift = 2;
+                    console.log("Set Input One - Parameter One: "+positionOne);
                 }
-                else
+                else if (!inputTwoUsed){
                     code[positionOne] = inputTwo;
-                shift = 2;
-                console.log("Set Input - Parameter One: "+positionOne);
+                    inputTwoUsed = true;
+                    shift = 2;
+                    console.log("Set Input Two - Parameter One: "+positionOne);
+                }
+                else{
+                    run = false;
+                    shift = 0;
+                    console.log("No Input");
+                }
                 break;
             case 4:
                 var positionOne = parseInt(code[window+1]);
                 output = parameterOneMode == 0 ? parseInt(code[positionOne]) : positionOne;
+                inputTwo = output;
                 shift = 2;
                 console.log("Set Output - Parameter One "+positionOne);
                 console.log("Output: "+output);
-                run = false;
+                //run = false;
                 break;
             case 5:
                 var positionOne = parseInt(code[window+1]);
@@ -172,12 +206,13 @@ function runIntcode(code, inputOne, inputTwo){
                 break;
             case 99:
                 run = false;
+                halt = true;
                 shift = 1;
                 console.log("Done");
-                throw "HALT";
+                //throw "HALT";
                 break;
         }
         window = window + shift;
     }
-    return output;
+    return {"Output": output, "Halt": halt, "EndPoint": window};
 }
