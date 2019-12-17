@@ -1,8 +1,16 @@
-function runIntcode(code, input){
-    var window = 0;
+function runIntcode(code, input, startPosition, base, outputTotal){
+    var window = startPosition != null ? startPosition : 0;
     var run = true;
-    var output = [];
-    var relativeBase = 0;
+    var returnValue = {
+        "output": [],
+        "position": window,
+        "relativeBase": 0,
+        "terminated": false,
+        "failed": false
+    };
+    var outputCount = 0;
+    var relativeBase = base != null ? base : 0;
+
     while(run){
         var command = parseInt(code[window]);
         var oppCode = command%100;
@@ -41,9 +49,13 @@ function runIntcode(code, input){
                 console.log(parseInt(code[window+1])+"Parameter One: "+parameterOne);
                 break;
             case 4:
-                output.push(getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase));
+                returnValue.output.push(getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase));
                 shift = 2;
-                console.log("Output: "+output);
+                outputCount++;
+                if(outputCount >= outputTotal){
+                    run = false;
+                }
+                console.log("Output: "+returnValue.output);
                 break;
             case 5:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -93,17 +105,25 @@ function runIntcode(code, input){
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
                 relativeBase = relativeBase + parameterOne;
                 shift = 2;
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                console.log("Parameter1: "+parameterOne);
                 console.log("New Relative Base: "+relativeBase)
                 break;
             case 99:
                 run = false;
+                returnValue.terminated = true;
                 shift = 1;
+                break;
+            default:
+                run = false;
+                returnValue.terminated = true;
+                returnValue.failed = true;
                 break;
         }
         window = window + shift;
+        returnValue.position = window;
+        returnValue.relativeBase = relativeBase;
     }
-    return output;
+    return returnValue;
 }
 
 function getValue(parameterMode, code, position, relativeBase, index){
