@@ -22,7 +22,7 @@ function runIntcode(code, input, startPosition, base, outputTotal){
         var parameterThreeMode = command%10;
         command = Math.floor(command/10)
         var shift;
-        console.log("Opcode: "+oppCode+", parameterOneMode: "+parameterOneMode+", parameterTwoMode: "+parameterTwoMode+", parameterThreeMode: "+parameterThreeMode);
+        //console.log("Opcode: "+oppCode+", parameterOneMode: "+parameterOneMode+", parameterTwoMode: "+parameterTwoMode+", parameterThreeMode: "+parameterThreeMode);
         switch(oppCode){
             case 1:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -31,7 +31,7 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                 var index = getValue(parameterThreeMode, code, parseInt(code[window+3]), relativeBase, true);
                 code[index] = sum;
                 shift = 4;
-                console.log("Parameter One: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                //console.log("Parameter One: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 2:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -40,13 +40,13 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                 var index = getValue(parameterThreeMode, code, parseInt(code[window+3]), relativeBase, true);
                 code[index] = multiple;
                 shift = 4;
-                console.log("Parameter One:  "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                //console.log("Parameter One:  "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 3:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase, true);
                 code[parameterOne] = input;
                 shift = 2;
-                console.log(parseInt(code[window+1])+"Parameter One: "+parameterOne);
+                //console.log(parseInt(code[window+1])+"Parameter One: "+parameterOne);
                 break;
             case 4:
                 returnValue.output.push(getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase));
@@ -55,7 +55,7 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                 if(outputCount >= outputTotal){
                     run = false;
                 }
-                console.log("Output: "+returnValue.output);
+                //console.log("Output: "+returnValue.output);
                 break;
             case 5:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -68,7 +68,7 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                     shift = 3;
                 }
                 
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo);
+                //console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo);
                 break;
             case 6:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -81,7 +81,7 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                     shift = 3;
                 }
                 
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo);
+                //console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo);
                 break;
             case 7:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -90,7 +90,7 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                 var index = getValue(parameterThreeMode, code, parseInt(code[window+3]), relativeBase, true);
                 code[index] = lessThan;
                 shift = 4;
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                //console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 8:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
@@ -99,14 +99,14 @@ function runIntcode(code, input, startPosition, base, outputTotal){
                 var index = getValue(parameterThreeMode, code, parseInt(code[window+3]), relativeBase, true);
                 code[index] = equalTo;
                 shift = 4;
-                console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
+                //console.log("Parameter1: "+parameterOne+", parameterTwo: "+parameterTwo+", parameterThree: "+index);
                 break;
             case 9:
                 var parameterOne = getValue(parameterOneMode, code, parseInt(code[window+1]), relativeBase);
                 relativeBase = relativeBase + parameterOne;
                 shift = 2;
-                console.log("Parameter1: "+parameterOne);
-                console.log("New Relative Base: "+relativeBase)
+                //console.log("Parameter1: "+parameterOne);
+                //console.log("New Relative Base: "+relativeBase)
                 break;
             case 99:
                 run = false;

@@ -1,6 +1,7 @@
 const readline = require('readline');
 const fs = require('fs');
 const computer = require('./intcode');
+const mathjs = require('mathjs');
 
 const rl = readline.createInterface({
     input: fs.createReadStream('Dec12.txt')
@@ -27,7 +28,7 @@ rl.on('line', function (line) {
 });
 
 rl.on('close', function(){
-    console.log(repeatingSystem(moons));
+    console.log(findRepeatingStep(moons));
 });
 
 function calculateEnergy(moons, cycles){
@@ -83,22 +84,54 @@ function calculateEnergy(moons, cycles){
     return totalEnergy;
 }
 
-function repeatingSystem(moons){
-    var system = convert(moons);
-    var repeat = false;
+function findRepeatingStep(moons){
+
+    var factors = repeatingSystems(moons);
+
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    return mathjs.lcm(factors.x, factors.y, factors.z);
+}
+function repeatingSystems(moons){
+    var systems = {
+        x: new Set(),
+        y: new Set(),
+        z: new Set()
+    };
+    var repeat = {
+        x: false,
+        y: false,
+        z: false
+    };
+    var letters = ["x", "y", "z"];
+    var factors = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
     var step = 0;
-    while(!repeat){
+    
+    systems.x.add(convert(moons, "x"));
+    systems.y.add(convert(moons, "y"));
+    systems.z.add(convert(moons, "z"));
+
+    while(!repeat.x || !repeat.y || !repeat.z){
         process.stdout.clearLine();  // clear current text
         process.stdout.cursorTo(0);
         process.stdout.write("Step "+step); 
         moons = systemStep(moons);
-        if(system === convert(moons)){
-            repeat = true;
-            break;
-        }
         step++;
+        for(var i = 0; i < letters.length; i++){
+            var current = convert(moons, letters[i]);
+            if(systems[letters[i]].has(current)){
+                repeat[letters[i]] = true;
+                factors[letters[i]] = step;
+            }
+            else
+                systems[letters[i]].add(current);
+        }
     }
-    return step;
+    return factors;
 }
 
 function systemStep(moons){
@@ -144,11 +177,11 @@ function systemStep(moons){
     return moons;
 }
 
-function convert(moons){
+function convert(moons, letter){
     var string = "";
     for(var i = 0; i < moons.length; i++){
-        string = string + moons[i].position.x + moons[i].position.y + moons[i].position.z +":";
-        string = string + moons[i].velocity.x + moons[i].velocity.y + moons[i].velocity.z;
+        string = string + moons[i].position[letter]+":";
+        string = string + moons[i].velocity[letter];
         if(i < moons.lenght -1)
             string = string + "|";
     }
