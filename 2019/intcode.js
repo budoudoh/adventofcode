@@ -6,7 +6,8 @@ function runIntcode(code, input, startPosition, base, outputTotal){
         "position": window,
         "relativeBase": 0,
         "terminated": false,
-        "failed": false
+        "failed": false,
+        "inputRequired": false
     };
     var outputCount = 0;
     var relativeBase = base != null ? base : 0;
