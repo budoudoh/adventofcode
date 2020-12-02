@@ -38,25 +38,41 @@ function chemicalCost(reactions, units, endChemical, startChemical){
     while(chain.length > 0){
         chemical = chain.pop();
         if(reactions.hasOwnProperty(chemical.compound)){
-            var components = reactions[chemical.compound].components;
-            var formula_units = reactions[chemical.compound].units;
-            var factor;
-            var extra;
-            if(chemical.units > formula_units){
-                factor = Math.ceil(chemical.units/formula_units);
-                extra = factor*formula_units - chemical.units;
+            if(chemicals.hasOwnProperty(chemical.compound) && chemicals[chemical.compound].extra > 0){
+                if(chemicals[chemical.compound].extra >= chemical.units){
+                    chemicals[chemical.compound].units = chemicals[chemical.compound].units + chemical.units;
+                    chemicals[chemical.compound].extra = chemicals[chemical.compound].extra - chemical.units;
+                    chemical.units = 0;
+                }
+                /*else{
+                    chemical.units = chemical.units - chemicals[chemical.compound].extra;
+                    chemicals[chemical.compound].units = chemicals[chemical.compound].units + chemicals[chemical.compound].extra;
+                    chemicals[chemical.compound].extra = 0;
+                }*/
+            }
+
+            if(chemical.units > 0)
+            {
+                var components = reactions[chemical.compound].components;
+                var formula_units = reactions[chemical.compound].units;
+                var factor = 1;
+                var extra = 0;
+                if(chemical.units > formula_units){
+                    factor = Math.ceil(chemical.units/formula_units);
+                    extra = factor*formula_units - chemical.units;
+                }
 
                 if(chemicals.hasOwnProperty(chemical.compound)){
                     var potential = (factor - 1)*formula_units + chemicals[chemical.compound].extra;
                     if(potential >= chemical.units){
-                        var difference = potential - chemical.units;
+                        var difference = chemical.units % formula_units;
                         factor = factor - 1;
                         chemicals[chemical.compound].extra = chemicals[chemical.compound].extra - difference;
                     }
                     else{
                         chemicals[chemical.compound].extra = chemicals[chemical.compound].extra + extra;
                     }
-                    chemicals[chemical.compound] = chemicals[chemical.compound] + chemical.units;
+                    chemicals[chemical.compound].units = chemicals[chemical.compound].units + chemical.units;
                 }
                 else{
                     chemicals[chemical.compound] = {
@@ -64,13 +80,14 @@ function chemicalCost(reactions, units, endChemical, startChemical){
                         extra: extra
                     }
                 }
-            }
-            for(var i = 0; i < components.length; i++){
-                var current  = {
-                    compound: components[i].chemical,
-                    units: components[i].units*factor
+                
+                for(var i = 0; i < components.length; i++){
+                    var current  = {
+                        compound: components[i].chemical,
+                        units: components[i].units*factor
+                    }
+                    chain.push(current);
                 }
-                chain.push(current);
             }
         }
         else if(chemicals.hasOwnProperty(chemical.compound)){
