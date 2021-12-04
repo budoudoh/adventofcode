@@ -122,6 +122,11 @@ function findEdges(){
                         match_flipped: match_flipped
                     }
                     puzzle[i].neighbors[neighbor.id] = neighbor;
+                    if(side_flipped){
+                        puzzle[i].orientation.flipped = {
+                            side: side
+                        };
+                    }
                 }
             }
         }
@@ -139,37 +144,56 @@ function findEdges(){
 }
 
 function findSeaMonsters(){
-    for(let corner in corners){
-        let puzzle_ids = [];
-        let pieces_set = new Set();
-        let current = corners[corner];
-        pieces_set.add(corner);
-        while(pieces_set.size < puzzle.length){
-            let row = [current.id];
-            let neighbor_count =  countActiveNeighbors(current, pieces_set);
-            while(neighbor_count > 1){
-                let next;
-                let least_neighbors = 4;
-                for(let neighbor in current.neighbors){
-                    if(!pieces_set.has(neighbor)){
-                        let count = countActiveNeighbors(pieces[neighbor], pieces_set);
-                        if(count < least_neighbors){
-                            next = pieces[neighbor];
-                            least_neighbors = count;
-                        }
-                    }
-                }
-                row.push(next.id);
-                pieces_set.add(next.id+"");
-                neighbor_count = least_neighbors;
-                current = next;
-            }
-            puzzle_ids.push(row);
-            let next_corner = Object.keys(corners[corner].neighbors).filter(x => !pieces_set.has(x))[0];
-            pieces_set.add(next_corner);
-            current = pieces[next_corner];
+    let corner = Object.keys(corners)[0];
+    let matrix = [];
+    let eop = false;
+    let current = corner;
+    while(!eop){
+        let eor = false;
+        let row_holder = [];
+        while(!eor){
+            let ro
+            for()
         }
     }
+}
+
+function rotateMatrix(matrix, degrees){
+    let rotation_count = degrees/90;
+    let current_rotations = 0;
+    let result = matrix.slice(0);
+
+    while(current_rotations < rotation_count){
+        let holder = [];
+        for(let x = 0; x < result[0].length; x++){
+            let row = "";
+            for(let y = 0; y < result.length; y++){
+                row = row+result[y].charAt(x);
+            }
+            holder.push(row);
+        }
+        result = holder;
+        current_rotations++;
+    }
+    return result;
+}
+
+function flipMatrix(matrix, horizontal){
+    let result = [];
+    if(horizontal){
+        for(let i = 0; i < matrix.length; i++){
+            let current = matrix[i];
+            current = _.reverse(current.split('')).join('');
+            result.push(current);
+        }
+    }
+    else{
+        for(let i = matrix.length-1; i < 0; i++){
+            let current = matrix[i];
+            result.push(current);
+        }
+    }
+    return current;
 }
 
 function countActiveNeighbors(piece, piece_set){
