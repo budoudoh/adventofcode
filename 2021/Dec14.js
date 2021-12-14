@@ -30,7 +30,8 @@ rl.on('line', function (line) {
 });
 
 rl.on('close', function(){
-    console.log(part1(polymer_template, insertion_rules, 40));
+    //console.log(part1(polymer_template, insertion_rules, 40));
+    console.log(part2(polymer_template, insertion_rules, 40));
 });
 
 function part1(template, rules, steps){
@@ -69,5 +70,61 @@ function part1(template, rules, steps){
         counts[char] = counts[char] + 1;
     }
     
-    return counts;
+    let min  = NaN;
+    let max = NaN;
+    for(let key in counts){
+        min = Number.isNaN(min) ? counts[key] : Math.min(min, counts[key]);
+        max = Number.isNaN(max) ? counts[key] : Math.max(max, counts[key]);
+    }
+
+    return max - min;
+}
+
+function part2(template, rules, steps){
+    template = growTemplate(template, rules, steps);
+    let counts = {};
+    for(let i = 0; i < template.length; i++){
+        let char = template.charAt(i);
+        if(!counts.hasOwnProperty(char)){
+            counts[char] = 0;
+        }
+        counts[char] = counts[char] + 1;
+    }
+    
+    let min  = NaN;
+    let max = NaN;
+    for(let key in counts){
+        min = Number.isNaN(min) ? counts[key] : Math.min(min, counts[key]);
+        max = Number.isNaN(max) ? counts[key] : Math.max(max, counts[key]);
+    }
+
+    return max - min;
+}
+
+function growTemplate(template, rules, steps){
+    if(steps <= 0){
+        return template;
+    }
+    console.log(steps);
+    let insertions = [];
+    for(let key in rules){
+        let index = template.indexOf(key);
+        
+        while(index !== -1){
+            let insertion = {
+                letter: rules[key],
+                index: index
+            };
+            insertions.push(insertion);
+            index = template.indexOf(key, index + 1)
+        }
+    }
+    insertions.sort((x,y) => x.index > y.index ? 1 : -1);
+    
+    for(let i = 0; i < insertions.length; i++){
+        let temp = insertions[i];
+        template = insertStr(template,(temp.index + 1 + i), temp.letter);
+    }
+
+    return growTemplate(template, rules, (steps-1))
 }
