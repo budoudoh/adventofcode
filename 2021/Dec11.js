@@ -108,11 +108,9 @@ function part2(octopuses){
                 }
             }
         }
+        count++;
         if(flashed.size == 100){
             all_flash = true;
-        }
-        else{
-            count++;
         }
     }
     return count;
