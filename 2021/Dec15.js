@@ -13,7 +13,7 @@ rl.on('line', function (line) {
     let y = risk_levels.length;
     for(let x = 0; x < row.length; x++){
         let node = {
-            shortest_distance: NaN,
+            shortest_distance: Number.MAX_VALUE,
             previous_node: "",
             visited: false,
             weight: row[x]
@@ -24,11 +24,11 @@ rl.on('line', function (line) {
 });
 
 rl.on('close', function(){
-    console.log(part1(risk_levels.slice(), node_distance));
+    console.log(part2(risk_levels.slice(), node_distance));
 });
 
-let transform = [[1,0],[-1,0],[0,1],[0,-1]];
 function part1(risk_levels, node_distance){
+    let transform = [[1,0],[-1,0],[0,1],[0,-1]];
     let start = "0,0";
     let finish = `${risk_levels.length-1},${risk_levels[0].length-1}`;
     node_distance[start].shortest_distance = 0;
@@ -42,7 +42,7 @@ function part1(risk_levels, node_distance){
             let neighbor_key = neighbor.join(",");
             if(node_distance.hasOwnProperty(neighbor_key)){
                 let current_distance = node_distance[current].shortest_distance + node_distance[neighbor_key].weight;
-                if(Number.isNaN(node_distance[neighbor_key].shortest_distance) || node_distance[neighbor_key].shortest_distance > current_distance){
+                if(node_distance[neighbor_key].shortest_distance > current_distance){
                     node_distance[neighbor_key].shortest_distance = current_distance;
                     node_distance[neighbor_key].previous_node = current;
                 }
@@ -52,6 +52,7 @@ function part1(risk_levels, node_distance){
                 }
             }
         }
+        unvisited.sort((a,b) => node_distance[a].shortest_distance > node_distance[b].shortest_distance ? 1 : -1);
     } 
     return node_distance[finish].shortest_distance;
 }
@@ -91,7 +92,7 @@ function increaseGraph(risk_levels){
                 }
                 row.push(current);
                 let node = {
-                    shortest_distance: NaN,
+                    shortest_distance: Number.MAX_VALUE,
                     previous_node: "",
                     visited: false,
                     weight: current
