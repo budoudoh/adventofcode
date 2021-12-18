@@ -18,9 +18,9 @@ rl.on('close', function(){
 });
 
 function snailfishMath(homework){
-    let temp = [homework.shift()];
+    let temp = homework.shift();
     while(homework.length > 0){
-        temp.push(homework.shift());
+        temp = [temp, homework.shift()];
         temp = snailfishReduce(temp);
     }
     return snailfishMagnitude(temp);
@@ -74,11 +74,25 @@ function snailfishReduce(problem){
             }
         }
     }while(level > 0);
-    return homework;
+    return problem;
 }
 
 function snailfishMagnitude(pair){
-
+    let magnitude = pair.reduce((previousValue, currentValue) => {
+        if(Array.isArray(currentValue) && Array.isArray(previousValue)){
+            return 3*snailfishMagnitude(previousValue) + 2*snailfishMagnitude(currentValue);
+        }
+        else if(Array.isArray(currentValue)){
+            return 3*previousValue + 2*snailfishMagnitude(currentValue);
+        }
+        else if(Array.isArray(previousValue)){
+            return 3*snailfishMagnitude(previousValue) + 2*currentValue;
+        }
+        else{
+            return 3*previousValue + 2*currentValue;
+        }
+    })
+    return magnitude;
 }
 
 
@@ -101,7 +115,13 @@ function addRemainingValue(problem, value1, value2){
     for(let i = index-1; i > 0; i--){
         if(!isNaN(problem_string.charAt(i))){
             let current = value1 + parseInt(problem_string.charAt(i));
-            problem_string = problem_string.replaceAt(i, current.toString());
+            if(current > 9){
+                let split = [Math.floor(current/2), Math.round(current/2)];
+                problem_string = problem_string.replaceAt(i, JSON.stringify(split));
+            }
+            else{
+                problem_string = problem_string.replaceAt(i, current.toString());
+            }
             replace_value1 = true;
             break;
         }
@@ -110,7 +130,13 @@ function addRemainingValue(problem, value1, value2){
     for(let i = index+query.length; i < problem_string.length; i++){
         if(!isNaN(problem_string.charAt(i))){
             let current = value2 + parseInt(problem_string.charAt(i));
-            problem_string = problem_string.replaceAt(i, current.toString());
+            if(current > 9){
+                let split = [Math.floor(current/2), Math.round(current/2)];
+                problem_string = problem_string.replaceAt(i, JSON.stringify(split));
+            }
+            else{
+                problem_string = problem_string.replaceAt(i, current.toString());
+            }
             replace_value2 = true;
             break;
         }
