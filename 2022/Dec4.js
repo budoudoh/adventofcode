@@ -7,25 +7,24 @@ const rl = readline.createInterface({
 
 let lineRegex = /([0-9]+ ?)-([0-9]+ ?),([0-9]+ ?)-([0-9]+ ?)$/;
 
+let idRangePairs = [];
 rl.on('line', function (line) {
     let matches = lineRegex.exec(line.trim());
     let entry = {
-        x1: parseInt(matches[1]),
-        y1: parseInt(matches[2]),
-        x2: parseInt(matches[3]),
-        y2: parseInt(matches[4])
+        range1Start: parseInt(matches[1]),
+        range1End: parseInt(matches[2]),
+        range2Start: parseInt(matches[3]),
+        range2End: parseInt(matches[4])
     }
-
-    if(entry.x1 == entry.x2){
-        vertical_lines.push(entry);
-    }
-
-    if(entry.y1 == entry.y2){
-        horizontal_lines.push(entry);
-    }
-    lines.push(entry);
+    idRangePairs.push(entry);
 });
 
 rl.on('close', function(){
-    console.log(part2(lines));
+    console.log(part1(idRangePairs));
 });
+
+function part1(idRangePairs){
+    for(let i in idRangePairs){
+        
+    }
+}
